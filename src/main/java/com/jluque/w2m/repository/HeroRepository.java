@@ -13,6 +13,7 @@ import com.jluque.w2m.entity.HeroEntity;
 public interface HeroRepository extends JpaRepository<HeroEntity, Integer> {
 
 	@Query(value = "select * from HERO H where LOWER (H.nombre) like %:name%", nativeQuery = true)
-	public List<HeroEntity> findByName(@Param("name") String name);
+	public List<HeroEntity> findContainByName(@Param("name") String name);
 
+	public HeroEntity findByName(String name);
 }

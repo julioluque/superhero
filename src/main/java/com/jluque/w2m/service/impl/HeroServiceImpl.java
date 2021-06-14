@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import com.jluque.w2m.dto.HeroRequest;
 import com.jluque.w2m.dto.HeroResponse;
 import com.jluque.w2m.entity.HeroEntity;
+import com.jluque.w2m.exception.custom.FieldExistCustomException;
+import com.jluque.w2m.exception.custom.NotFoundCustomException;
 import com.jluque.w2m.mapper.HeroMapper;
 import com.jluque.w2m.repository.HeroRepository;
 import com.jluque.w2m.service.HeroService;
@@ -34,32 +36,39 @@ public class HeroServiceImpl implements HeroService {
 
 	public List<HeroResponse> findAll() throws Exception {
 		log.info("-----------> CACHING ALL");
-		return repository.findAll().stream().map(HeroMapper::heroEntityToDto).collect(Collectors.toList());
+		List<HeroEntity> heroEntity = repository.findAll();
+		if (heroEntity.isEmpty())
+			throw new NotFoundCustomException("Empty List");
+		return heroEntity.stream().map(HeroMapper::heroEntityToDto).collect(Collectors.toList());
 	}
 
 	@Override
 	@Cacheable(cacheNames = "herocache", key = "#id")
 	public HeroResponse findById(Integer id) throws Exception {
 		log.info("-----------> CACHING ID: " + id);
-		HeroResponse response = null;
 		Optional<HeroEntity> heroEntity = repository.findById(id);
-		if (heroEntity.isPresent()) {
-			response = HeroMapper.heroEntityToDto(heroEntity.get());
-		}
-		return response;
+		if (!heroEntity.isPresent())
+			throw new NotFoundCustomException("ID: " + id);
+		return HeroMapper.heroEntityToDto(heroEntity.get());
 	}
 
 	@Override
 	@Cacheable(cacheNames = "herocache", key = "#name")
 	public List<HeroResponse> findByName(String name) throws Exception {
 		log.info("-----------> CACHING NAME: " + name);
-		return repository.findByName(name).stream().map(HeroMapper::heroEntityToDto).collect(Collectors.toList());
-
+		List<HeroEntity> heroEntity = repository.findContainByName(name);
+		if (heroEntity.isEmpty())
+			throw new NotFoundCustomException("Name: " + name);
+		return heroEntity.stream().map(HeroMapper::heroEntityToDto).collect(Collectors.toList());
 	}
 
 	@Override
 	@CacheEvict(value = "herocache", allEntries = true)
 	public void saveHero(HeroRequest heroRequest) throws Exception {
+		HeroEntity hero = repository.findByName(heroRequest.getName());
+		if (hero != null)
+			throw new FieldExistCustomException(heroRequest.getName());
+		
 		HeroEntity heroEntity = HeroMapper.heroDtoToEntity(heroRequest);
 		heroEntity.setStatus(true);
 		repository.save(heroEntity);
@@ -74,6 +83,8 @@ public class HeroServiceImpl implements HeroService {
 			heroEntity.get().setSaga(heroRequest.getSaga());
 			heroEntity.get().setStatus(true);
 			repository.save(heroEntity.get());
+		} else {
+			throw new NotFoundCustomException("ID: " + id);
 		}
 		log.info("-----------> CACHING UPDATE: ");
 		return HeroMapper.heroEntityToDto(heroEntity.get());
