@@ -63,8 +63,10 @@ public class GeneralHandlerException {
 	}
 
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	@ExceptionHandler({ UnauthorizedCustomException.class })
+	@ExceptionHandler({ UnauthorizedCustomException.class,
+			org.springframework.security.access.AccessDeniedException.class })
 	public void unauthorizedHandler() {
+
 	}
 
 }

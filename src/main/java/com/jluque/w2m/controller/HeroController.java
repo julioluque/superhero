@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,9 +23,9 @@ import com.jluque.w2m.service.HeroService;
 
 import lombok.extern.log4j.Log4j2;
 
+@PreAuthorize("authenticated")
 @RestController
 @RequestMapping("/superheros")
-@Log4j2
 public class HeroController {
 
 	private HeroService service;
@@ -47,6 +48,7 @@ public class HeroController {
 	}
 
 	@GetMapping()
+	@PreAuthorize("hasRole('USER') OR hasRole('MANAGER')")
 	public ResponseEntity<List<HeroResponse>> findByName(@RequestParam String name) throws Exception {
 		if (name.isEmpty())
 			throw new BadRequestCustomException("Name empty");
@@ -55,21 +57,23 @@ public class HeroController {
 	}
 
 	@PostMapping()
+	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<String> saveHero(@RequestBody HeroRequest heroRequest) throws Exception {
 		service.saveHero(heroRequest);
 		return new ResponseEntity<>("Created!", HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<HeroResponse> updateHero(@PathVariable Integer id, @RequestBody HeroRequest heroRequest) {
-		
 		HeroResponse heroResponse = service.updateHero(id, heroRequest);
 		return new ResponseEntity<>(heroResponse, HttpStatus.OK);
 	}
 
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteById(@PathVariable Integer id) {
-			service.deleteHeroById(id);
+		service.deleteHeroById(id);
 		return new ResponseEntity<>("Deleted", HttpStatus.OK);
 	}
 
