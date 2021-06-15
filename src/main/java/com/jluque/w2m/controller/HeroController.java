@@ -20,12 +20,12 @@ import com.jluque.w2m.dto.HeroRequest;
 import com.jluque.w2m.dto.HeroResponse;
 import com.jluque.w2m.exception.custom.BadRequestCustomException;
 import com.jluque.w2m.service.HeroService;
-
-import lombok.extern.log4j.Log4j2;
+import com.jluque.w2m.utils.anotation.CustomRequestTimed;
 
 @PreAuthorize("authenticated")
 @RestController
 @RequestMapping("/superheros")
+
 public class HeroController {
 
 	private HeroService service;
@@ -35,18 +35,21 @@ public class HeroController {
 		this.service = service;
 	}
 
+	@CustomRequestTimed
 	@GetMapping("/")
 	public ResponseEntity<List<HeroResponse>> getAll() throws Exception {
 		List<HeroResponse> response = service.findAll();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@CustomRequestTimed
 	@GetMapping("/{id}")
 	public ResponseEntity<HeroResponse> getById(@PathVariable Integer id) throws Exception {
 		HeroResponse response = service.findById(id);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@CustomRequestTimed
 	@GetMapping()
 	@PreAuthorize("hasRole('USER') OR hasRole('MANAGER')")
 	public ResponseEntity<List<HeroResponse>> findByName(@RequestParam String name) throws Exception {
@@ -56,6 +59,7 @@ public class HeroController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@CustomRequestTimed
 	@PostMapping()
 	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<String> saveHero(@RequestBody HeroRequest heroRequest) throws Exception {
@@ -63,6 +67,7 @@ public class HeroController {
 		return new ResponseEntity<>("Created!", HttpStatus.CREATED);
 	}
 
+	@CustomRequestTimed
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('MANAGER')")
 	public ResponseEntity<HeroResponse> updateHero(@PathVariable Integer id, @RequestBody HeroRequest heroRequest) {
@@ -70,6 +75,7 @@ public class HeroController {
 		return new ResponseEntity<>(heroResponse, HttpStatus.OK);
 	}
 
+	@CustomRequestTimed
 	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteById(@PathVariable Integer id) {

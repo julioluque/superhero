@@ -35,17 +35,17 @@ public class HeroServiceImpl implements HeroService {
 	@Cacheable("herocache")
 
 	public List<HeroResponse> findAll() throws Exception {
-		log.info("-----------> CACHING ALL");
+		log.info("CACHING ALL");
 		List<HeroEntity> heroEntity = repository.findAll();
 		if (heroEntity.isEmpty())
-			throw new NotFoundCustomException("Empty List");
+			throw new NotFoundCustomException("");
 		return heroEntity.stream().map(HeroMapper::heroEntityToDto).collect(Collectors.toList());
 	}
 
 	@Override
 	@Cacheable(cacheNames = "herocache", key = "#id")
 	public HeroResponse findById(Integer id) throws Exception {
-		log.info("-----------> CACHING ID: " + id);
+		log.info("CACHING ID: " + id);
 		Optional<HeroEntity> heroEntity = repository.findById(id);
 		if (!heroEntity.isPresent())
 			throw new NotFoundCustomException("ID: " + id);
@@ -55,7 +55,7 @@ public class HeroServiceImpl implements HeroService {
 	@Override
 	@Cacheable(cacheNames = "herocache", key = "#name")
 	public List<HeroResponse> findByName(String name) throws Exception {
-		log.info("-----------> CACHING NAME: " + name);
+		log.info("CACHING NAME: " + name);
 		List<HeroEntity> heroEntity = repository.findContainByName(name);
 		if (heroEntity.isEmpty())
 			throw new NotFoundCustomException("Name: " + name);
@@ -72,7 +72,7 @@ public class HeroServiceImpl implements HeroService {
 		HeroEntity heroEntity = HeroMapper.heroDtoToEntity(heroRequest);
 		heroEntity.setStatus(true);
 		repository.save(heroEntity);
-		log.info("-----------> CACHING SAVE: ");
+		log.info("CACHING SAVE: ");
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class HeroServiceImpl implements HeroService {
 		} else {
 			throw new NotFoundCustomException("ID: " + id);
 		}
-		log.info("-----------> CACHING UPDATE: ");
+		log.info("CACHING UPDATE: ");
 		return HeroMapper.heroEntityToDto(heroEntity.get());
 	}
 
@@ -94,7 +94,7 @@ public class HeroServiceImpl implements HeroService {
 	@CacheEvict(value = "herocache", allEntries = true)
 	public void deleteHeroById(Integer id) {
 		repository.deleteById(id);
-		log.info("-----------> CACHING DELETE ID: " + id);
+		log.info("CACHING DELETE ID: " + id);
 	}
 
 }
