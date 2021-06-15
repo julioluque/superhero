@@ -1,5 +1,6 @@
 package com.jluque.w2m.unit;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.jluque.w2m.entity.HeroEntity;
+import com.jluque.w2m.exception.custom.NotFoundCustomException;
 import com.jluque.w2m.repository.HeroRepository;
 import com.jluque.w2m.service.impl.HeroServiceImpl;
 
@@ -53,10 +55,15 @@ class HeroServiceTest {
 	}
 
 	@Test
+	void findByAllEmptyTest() throws Exception {
+		List<HeroEntity> emptyList = new ArrayList<>();
+		when(repository.findAll()).thenReturn(emptyList);
+		assertThrows(NotFoundCustomException.class, () -> heroService.findAll());
+	}
+	
+	@Test
 	void findByIdSuccessTest() throws Exception {
-
 		Integer inputId = 1;
-
 		Optional<HeroEntity> heroEntity = Optional.ofNullable(new HeroEntity());
 		heroEntity.get().setName("Spiderman");
 		heroEntity.get().setSaga("Marvel");
@@ -70,7 +77,7 @@ class HeroServiceTest {
 	void findByIdEmptyTest() throws Exception {
 		Integer inputId = 1;
 		when(repository.findById(anyInt())).thenReturn(Optional.empty());
-		assertEquals(heroService.findById(inputId), null);
+		assertThrows(NotFoundCustomException.class, () -> heroService.findById(inputId));
 	}
 
 }
