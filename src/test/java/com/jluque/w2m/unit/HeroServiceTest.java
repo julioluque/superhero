@@ -1,8 +1,11 @@
 package com.jluque.w2m.unit;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -15,8 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.jluque.w2m.dto.HeroRequest;
 import com.jluque.w2m.entity.HeroEntity;
+import com.jluque.w2m.exception.custom.FieldExistCustomException;
 import com.jluque.w2m.exception.custom.NotFoundCustomException;
+import com.jluque.w2m.mapper.HeroMapper;
 import com.jluque.w2m.repository.HeroRepository;
 import com.jluque.w2m.service.impl.HeroServiceImpl;
 
@@ -60,7 +66,7 @@ class HeroServiceTest {
 		when(repository.findAll()).thenReturn(emptyList);
 		assertThrows(NotFoundCustomException.class, () -> heroService.findAll());
 	}
-	
+
 	@Test
 	void findByIdSuccessTest() throws Exception {
 		Integer inputId = 1;
@@ -80,4 +86,88 @@ class HeroServiceTest {
 		assertThrows(NotFoundCustomException.class, () -> heroService.findById(inputId));
 	}
 
+	// ---------------------
+	@Test
+	void getByIdSuccessTest() throws Exception {
+
+		Optional<HeroEntity> heroEntity = Optional.ofNullable(new HeroEntity());
+		heroEntity.get().setName("Robot");
+
+		when(repository.findById(anyInt())).thenReturn(heroEntity);
+		Integer id = 1;
+		String expected = "Robot";
+		assertEquals(heroService.findById(id).getName(), expected);
+	}
+
+	@Test
+	void getByNameSuccessTest() throws Exception {
+		Optional<HeroEntity> heroEntity = Optional.ofNullable(new HeroEntity());
+		heroEntity.get().setName("Robot");
+
+		List<HeroEntity> heroEntityList = new ArrayList<>();
+		heroEntityList.add(heroEntity.get());
+
+		when(repository.findContainByName(anyString())).thenReturn(heroEntityList);
+
+		String name = "bot";
+		String expected = "Robot";
+		assertEquals(heroService.findByName(name).get(0).getName(), expected);
+
+	}
+
+	@Test
+	void saveSuccessTest() throws Exception {
+		HeroRequest heroRequest = new HeroRequest();
+		heroRequest.setName("Hulk");
+		heroRequest.setSaga("Marvel");
+
+		HeroEntity heroEntity = HeroMapper.heroDtoToEntity(heroRequest);
+
+		repository.save(heroEntity);
+		verify(repository, times(1)).save(heroEntity);
+
+		heroService.saveHero(heroRequest);
+	}
+
+	@Test
+	void saveExceptionTest() throws Exception {
+		HeroRequest heroRequest = new HeroRequest();
+		heroRequest.setName("Hulk");
+		heroRequest.setSaga("Marvel");
+
+		HeroEntity heroEntityDB = new HeroEntity();
+		heroEntityDB.setName("Hulk");
+		when(repository.findByName(anyString())).thenReturn(heroEntityDB);
+
+		assertThrows(FieldExistCustomException.class, () -> heroService.saveHero(heroRequest));
+	}
+
+	@Test
+	void updateSuccessTest() throws Exception {
+
+		HeroRequest heroRequest = new HeroRequest();
+		heroRequest.setName("Robot");
+		heroRequest.setSaga("nuevo");
+
+		Optional<HeroEntity> heroEntity = Optional.ofNullable(new HeroEntity());
+		heroEntity.get().setName("Robot");
+		when(repository.findById(anyInt())).thenReturn(heroEntity);
+
+		heroEntity.get().setSaga("nuevo");
+
+		repository.save(heroEntity.get());
+		verify(repository, times(1)).save(heroEntity.get());
+
+		Integer id = 1;
+		String expected = "nuevo";
+		assertEquals(heroService.updateHero(id, heroRequest).getSaga(), expected);
+	}
+
+	@Test
+	void deleteSuccessTest() throws Exception {
+		Integer id = 1;
+		repository.deleteById(id);
+		verify(repository, times(1)).deleteById(id);
+		heroService.deleteHeroById(id);
+	}
 }
