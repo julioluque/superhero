@@ -2,8 +2,15 @@ package com.jluque.w2m.unit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -21,7 +28,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jluque.w2m.controller.HeroController;
+import com.jluque.w2m.dto.HeroRequest;
 import com.jluque.w2m.dto.HeroResponse;
 import com.jluque.w2m.entity.HeroEntity;
 import com.jluque.w2m.exception.custom.NotFoundCustomException;
@@ -64,6 +73,71 @@ class HeroControllerTest {
 				.andExpect(jsonPath("$[0].name", is("Robot")));
 	}
 
+	@Test
+	void getById200Test() throws Exception {
+		Optional<HeroEntity> heroEntityA = Optional.ofNullable(new HeroEntity());
+		heroEntityA.get().setName("Robot");
+		HeroResponse heroResponse = HeroMapper.heroEntityToDto(heroEntityA.get());
+
+		when(service.findById(anyInt())).thenReturn(heroResponse);
+
+		Integer id = 5;
+		mockMvc.perform(get("/superheros/{id}", id).contentType(MediaType.APPLICATION_JSON_VALUE)
+				.accept(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk());
+	}
+
+	@Test
+	void getByName200Test() throws Exception {
+
+		Optional<HeroEntity> heroEntityA = Optional.ofNullable(new HeroEntity());
+		heroEntityA.get().setName("Robot");
+		HeroResponse heroResponse = HeroMapper.heroEntityToDto(heroEntityA.get());
+
+		when(service.findById(anyInt())).thenReturn(heroResponse);
+		String name = "Robot";
+		mockMvc.perform(get("/superheros?name={name}", name).contentType(MediaType.APPLICATION_JSON)
+				.content(new ObjectMapper().writeValueAsString(name)).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void saveTest() throws Exception {
+		HeroRequest heroRequest = new HeroRequest();
+		heroRequest.setName("Hulk");
+		heroRequest.setSaga("Marvel");
+
+		service.saveHero(heroRequest);
+		verify(service, times(1)).saveHero(heroRequest);
+
+		mockMvc.perform(post("/superheros?", heroRequest).contentType(MediaType.APPLICATION_JSON)
+				.content(new ObjectMapper().writeValueAsString(heroRequest)).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+	}
+
+	@Test
+	void updateTest() throws Exception {
+		Integer id = 1;
+		HeroResponse heroResponse = new HeroResponse();
+		heroResponse.setSaga("nuevo");
+
+		when(service.updateHero(anyInt(), any())).thenReturn(heroResponse);
+
+		mockMvc.perform(put("/superheros/{id}", id, heroResponse).contentType(MediaType.APPLICATION_JSON)
+				.content(new ObjectMapper().writeValueAsString(id))
+				.content(new ObjectMapper().writeValueAsString(heroResponse)).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	void deleteTest() throws Exception {
+		Integer id = 1;
+		service.deleteHeroById(id);
+		verify(service, times(1)).deleteHeroById(id);
+
+		mockMvc.perform(delete("/superheros/{id}", id).contentType(MediaType.APPLICATION_JSON)
+				.content(new ObjectMapper().writeValueAsString(id)).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
 	@Test
 	void getAll404Test() throws Exception {
 		when(repository.findAll()).thenReturn(null);
