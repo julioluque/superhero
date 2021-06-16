@@ -76,8 +76,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aspects</artifactId>
 		</dependency>
-
-
 	</dependencies>
 
 	<build>
@@ -85,6 +83,29 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<!-- <version>1.2.2</version> -->
+				<configuration>
+					<dockerHost>http://172.18.2.50:2375</dockerHost>
+					<imageName>superheroimage</imageName>
+					<!-- <baseImage>java:11</baseImage> -->
+					<baseImage>openjdk:11-slim</baseImage>
+					<entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
+					<!-- <entryPoint>["java", "-jar", "/superhero-0.0.1-SNAPSHOT.jar"]</entryPoint> -->
+					<!-- copy the service's jar file from target into the root directory 
+						of the image -->
+					<resources>
+						<resource>
+							<targetPath>/</targetPath>
+							<directory>${project.build.directory}</directory>
+							<include>${project.build.finalName}.jar</include>
+						</resource>
+					</resources>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
