@@ -1,4 +1,4 @@
-package com.jluque.w2m.unit;
+package com.jluque.w2m.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,7 +18,7 @@ import com.jluque.w2m.entity.HeroEntity;
 import com.jluque.w2m.repository.HeroRepository;
 
 @DataJpaTest
-class HeroRepositoryTest {
+class HeroRepositoryIT {
 
 	@Autowired
 	private HeroRepository heroRepository;
