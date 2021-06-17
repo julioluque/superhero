@@ -1,7 +1,7 @@
 # Superhero
 
-[![Repo](https://github.com/julioluque/superhero)](https://github.com/julioluque/superhero)
-[![Linkedin](https://www.linkedin.com/in/julio-luque/)](https://www.linkedin.com/in/julio-luque/)
+[![Repo](https://img.shields.io/badge/Repo-GitHub-blue)](https://github.com/julioluque/superhero)
+[![Linkedin](https://img.shields.io/badge/Linkedin-Julio-blue)](https://www.linkedin.com/in/julio-luque/)
 
 Api de superHeroes
 
@@ -16,23 +16,21 @@ La api esta preparada para hacer consultas muy veloces ya que cuenta con un sist
 Se puede ejecutar con `Maven` y `Docker` y cuenta con un dockerfile en base a `openjdk-11-slim`. Cuenta con seguridad basica y tiene lo minimo necesario para ser funcional.  
 
 [jdk11]: https://www.oracle.com/ar/java/technologies/javase-jdk11-downloads.html
-
-* [Sobre este proyecto](#Sobre-este-proyecto)
+* [Sobre este proyecto](#sobre-este-proyecto)
 * [Proposito](#proposito)
-
-* [Scripts DDL](#Scripts-DDL)
-* [@CustomRequestTimed](#CustomRequestTimed)
-* [Excepciones](#Excepciones)
+* [Scripts DDL](#scripts-DDL)
+* [@CustomRequestTimed](#customRequestTimed)
+* [Excepciones](#excepciones)
 * [Tests](#tests)
-  * [Unitarios](#Unitarios)
-  * [De Integracion](#De-Integracion)
-* [Docker](#Docker)
+  * [Unitarios](#unitarios)
+  * [De Integracion](#de-Integracion)
+* [Docker](#docker)
   * [Dockerfile](#dockerfile)
-* [Cache](#Cache)
-* [Documentacion](#Documentacion)
-* [Seguridad](#Seguridad)
-* [Releases](#Releases)
-* [Bugs](#Bugs)
+* [Cache](#cache)
+* [Documentacion](#documentacion)
+* [Seguridad](#seguridad)
+* [Releases](#releases)
+* [Bugs](#bugs)
 
 ## Proposito
 
